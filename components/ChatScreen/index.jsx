@@ -13,6 +13,7 @@ import firebase from 'firebase';
 import getOtherEmail from '../../utils/getOtherEmail';
 import TimeAgo from 'timeago-react';
 import { useRef } from 'react';
+import { useEffect } from 'react';
 
 const index = ({ chat, messages }) => {
     const [user] = useAuthState(auth);
@@ -34,7 +35,6 @@ const index = ({ chat, messages }) => {
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             message: inputMessage,
             user: user.email,
-            photoURL: user.photoURL,
         })
         setInputMessage('')
         scroll();
@@ -46,6 +46,8 @@ const index = ({ chat, messages }) => {
             block:"start",
         })
     }
+
+    useEffect(()=>scroll())
 
     const recipient = recipientsSnap?.docs?.[0]?.data();
 

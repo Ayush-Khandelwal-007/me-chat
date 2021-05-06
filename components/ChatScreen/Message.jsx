@@ -11,7 +11,7 @@ const Message = ({ user, message }) => {
             {
                 user === userloggedin.email ? (
                     <Sender>
-                        <span>{message.message}</span>
+                        <span style={{maxWidth:"450px",wordWrap: "break-word"}}>{message.message}</span>
                         <TimeStamp>
                             {
                                 message.timestamp ? (moment(message.timestamp).format('LT')) : ('...')
@@ -20,7 +20,7 @@ const Message = ({ user, message }) => {
                     </Sender>
                 ) : (
                     <Reciever>
-                        <span>{message.message}</span>
+                        <span style={{maxWidth:"450px",wordWrap: "break-word"}}>{message.message}</span>
                         <TimeStamp>
                             {
                                 message.timestamp ? (moment(message.timestamp).format('LT')) : ('...')
@@ -47,7 +47,7 @@ font-weight:500;
 width:fit-content;
 font-size:15px;
 padding:10px 45px 0px 15px;
-max-width:200px;
+max-width:450px;
 display:flex;
 flex-direction:column;
 `;
