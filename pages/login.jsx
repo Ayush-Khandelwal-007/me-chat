@@ -19,7 +19,7 @@ const Login = () => {
             </Head>
             <LoginContainer>
                 <Logo
-                    src={"./logoandname.png"}
+                    src={"/logoandname.png"}
                     alt={"Loading"}
                 />
                 <Button variant="outlined" onClick={SignIn}>Sign In With Google</Button>

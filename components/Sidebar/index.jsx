@@ -1,4 +1,4 @@
-import { Avatar, Button, IconButton, Input } from '@material-ui/core'
+import { Avatar, Button, IconButton, Input, Menu, MenuItem } from '@material-ui/core'
 import React from 'react'
 import styled from 'styled-components'
 import MoreVertIcon from '@material-ui/icons/MoreVert'
@@ -73,6 +73,16 @@ const index = () => {
         auth.signOut();
     };
 
+    const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const handleClickMenu = (event) => {
+      setAnchorEl(event.currentTarget);
+    };
+  
+    const handleCloseMenu = () => {
+      setAnchorEl(null);
+    };
+
     return (
         <Conatiner>
             <Snackbar open={openSnack} autoHideDuration={4000} onClose={handleCloseSnack}>
@@ -91,7 +101,25 @@ const index = () => {
                 <StyledAvatar src={user.photoURL} />
                 <ItemContainer>
                     <IconButton><ChatIcon style={{ color: 'white' }} /></IconButton>
-                    <IconButton><MoreVertIcon style={{ color: 'white' }} /></IconButton>
+                    <IconButton onClick={handleClickMenu} ><MoreVertIcon style={{ color: 'white' }} /></IconButton>
+                    <Menu
+                        id="simple-menu"
+                        anchorEl={anchorEl}
+                        keepMounted
+                        open={Boolean(anchorEl)}
+                        onClose={handleCloseMenu}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'center',
+                          }}
+                          transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'center',
+                          }}
+                    >
+                        <MenuItem onClick={handleCloseMenu}>Profile</MenuItem>
+                        <MenuItem onClick={signOut}>Logout</MenuItem>
+                    </Menu>
                 </ItemContainer>
             </Header>
             <SearchBar>
