@@ -91,9 +91,9 @@ const index = ({ chat, messages }) => {
             <Header>
                 {
                     recipient ? (
-                        <Avatar src={recipient?.profileURL} style={{boxShadow:'0px 0px 8px #4f1919'}}/>
+                        <Avatar src={recipient?.profileURL} style={{ boxShadow: '0px 0px 8px #4f1919' }} />
                     ) : (
-                        <Avatar style={{boxShadow:'0px 0px 8px #4f1919'}}>{recipientMail[0].toUpperCase() }</Avatar>
+                        <Avatar style={{ boxShadow: '0px 0px 8px #4f1919' }}>{recipientMail[0].toUpperCase()}</Avatar>
                     )
                 }
                 <UserInfo>

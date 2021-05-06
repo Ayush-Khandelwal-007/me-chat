@@ -15,7 +15,6 @@ export default function MyApp({ Component, pageProps }) {
       db.collection('users').doc(user.uid).set({
         email: user.email,
         lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
-        profileURL: user.photoURL,
       },
         {
           merge: true

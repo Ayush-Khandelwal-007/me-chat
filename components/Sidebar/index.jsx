@@ -1,5 +1,5 @@
-import { Avatar, Button, IconButton, Input, Menu, MenuItem } from '@material-ui/core'
-import React from 'react'
+import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, Input, Menu, MenuItem } from '@material-ui/core'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import MoreVertIcon from '@material-ui/icons/MoreVert'
 import ChatIcon from '@material-ui/icons/Chat'
@@ -8,13 +8,79 @@ import * as EV from 'email-validator'
 import AddNewChat from './AddNewChat'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useCollection } from 'react-firebase-hooks/firestore'
-import { auth, db } from '../../firebase'
+import { auth, db ,storage} from '../../firebase'
 import Snackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import ChatBar from './ChatBar'
+import FileUpload from '../FileUpload'
 
 const index = () => {
     const [user] = useAuthState(auth);
+    const [porfilePic,setProfilePic]=useState('');
+    const [selectedFile, setSelectedFile] = useState();
+    const [enabled, setEnabled] = useState(false);
+    const [loading,setLoading]=useState(false);
+    const [openAddProjectDialog, setOpenAddProjectDialog] = useState(false);
+
+    const upload = () => {
+        const uploadTask = storage.ref(`ProfilePics/${user.uid}`).put(selectedFile);
+
+        uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              const prog = Math.round(
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+              );
+            },
+            (error) => {
+              console.log(error);
+            },
+            () => {
+              storage
+                .ref("ProfilePics")
+                .child(user.uid)
+                .getDownloadURL()
+                .then((url) => {
+                  db.collection("users").doc(user.uid).set({
+                    profileURL:url
+                  },{merge:true});
+                  setLoading(false);
+                  setEnabled(false);
+                  setSelectedFile(null);
+                  setOpenAddProjectDialog(false);
+                });
+            }
+          );
+    }
+
+    useEffect(()=>{
+        db.collection('users').doc(user.uid).get().then((doc)=>{setProfilePic(doc.data().profileURL?(doc.data().profileURL):(user.email[0].toLowerCase()))})
+    })
+
+    const ImageContainer = styled.div`
+            padding:50px;
+            background-color:#e52165;
+            >div{
+                height:350px;
+                width:350px;
+                border-radius:50%;
+                border:2px solid #64f264;
+                background:url(${porfilePic});
+                background-repeat:no-repeat;
+                background-size:100% 100%;
+                background-position:center center;
+
+                >img{
+                    position: absolute;
+                    height: 60px;
+                    width: 60px;
+                    bottom: 130px;
+                    right: 65px;
+                    cursor: pointer;
+                }
+                }
+            `;
+
     const userChat = db.collection('chats').where('users', 'array-contains', user.email);
 
     const [chatsSnapShots] = useCollection(userChat);
@@ -91,20 +157,55 @@ const index = () => {
     const handleCloseDialog = () => {
         setOpenDialog(false);
     };
-  
+
 
     return (
         <Conatiner>
-            <Dialog onClose={handleCloseDialog} aria-labelledby="customized-dialog-title" open={openDialog}>
-                <DialogTitle id="customized-dialog-title" onClose={handleCloseDialog}>
-                    ProfilePic
-                </DialogTitle>
-                <DialogContent dividers>
+            <Dialog open={openAddProjectDialog}>
+                <DialogTitle id="form-dialog-title">Select new Profile Pic</DialogTitle>
+                <Divider />
+                <DialogContent>
+                    {
+                        loading === true ? (<div style={{ width: "60vw" }}>LOADING...</div>) : (
+                            <FileUpload setSelectedFile={setSelectedFile} setEnabled={setEnabled} selectedFile={selectedFile} enabled={enabled} />
+                        )
+                    }
 
                 </DialogContent>
+                <Divider />
                 <DialogActions>
+                    <Button disabled={loading} onClick={() => { setOpenAddProjectDialog(false) }} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={() => { upload() }} disabled={(!enabled) || (loading)} color="primary">
+                        Upload
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog
+                onClose={handleCloseDialog}
+                aria-labelledby="customized-dialog-title"
+                open={openDialog}
+            >
+                <DialogTitle
+                    classes={{
+                        root: 'dialoghf'
+                    }}
+                    id="customized-dialog-title"
+                    onClose={handleCloseDialog}
+                >
+                    ProfilePic
+                </DialogTitle>
+                <ImageContainer>
+                    <div><img onClick={() => { setOpenAddProjectDialog(true) }} src='/plus.svg' /></div>
+                </ImageContainer>
+                <DialogActions
+                    classes={{
+                        root: 'dialoghf'
+                    }}
+                >
                     <Button autoFocus onClick={handleCloseDialog} color="primary">
-                        Save changes
+                        Close
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -121,7 +222,7 @@ const index = () => {
                 createChat={createChat}
             />
             <Header>
-                <StyledAvatar onClick={handleClickOpenDialog} src={user.photoURL} />
+                <StyledAvatar onClick={handleClickOpenDialog} src={porfilePic} />
                 <ItemContainer>
                     <IconButton><ChatIcon style={{ color: 'white' }} /></IconButton>
                     <IconButton onClick={handleClickMenu} ><MoreVertIcon style={{ color: 'white' }} /></IconButton>
