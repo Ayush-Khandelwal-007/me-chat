@@ -10,12 +10,15 @@
   "dependencies": {
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",
+    "@material-ui/lab": "^4.0.0-alpha.58",
     "email-validator": "^2.0.4",
     "firebase": "^8.4.3",
+    "moment": "^2.29.1",
     "next": "^10.0.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-firebase-hooks": "^3.0.4",
-    "styled-components": "^5.2.3"
+    "styled-components": "^5.2.3",
+    "timeago-react": "^3.0.2"
   }
 }
