@@ -76,15 +76,38 @@ const index = () => {
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const handleClickMenu = (event) => {
-      setAnchorEl(event.currentTarget);
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+    };
+
+    const [openDialog, setOpenDialog] = React.useState(false);
+
+    const handleClickOpenDialog = () => {
+        setOpenDialog(true);
+    };
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
     };
   
-    const handleCloseMenu = () => {
-      setAnchorEl(null);
-    };
 
     return (
         <Conatiner>
+            <Dialog onClose={handleCloseDialog} aria-labelledby="customized-dialog-title" open={openDialog}>
+                <DialogTitle id="customized-dialog-title" onClose={handleCloseDialog}>
+                    ProfilePic
+                </DialogTitle>
+                <DialogContent dividers>
+
+                </DialogContent>
+                <DialogActions>
+                    <Button autoFocus onClick={handleCloseDialog} color="primary">
+                        Save changes
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <Snackbar open={openSnack} autoHideDuration={4000} onClose={handleCloseSnack}>
                 <MuiAlert elevation={6} variant="filled" onClose={handleCloseSnack} severity="error" >
                     {error}
@@ -98,7 +121,7 @@ const index = () => {
                 createChat={createChat}
             />
             <Header>
-                <StyledAvatar src={user.photoURL} />
+                <StyledAvatar onClick={handleClickOpenDialog} src={user.photoURL} />
                 <ItemContainer>
                     <IconButton><ChatIcon style={{ color: 'white' }} /></IconButton>
                     <IconButton onClick={handleClickMenu} ><MoreVertIcon style={{ color: 'white' }} /></IconButton>
@@ -111,11 +134,11 @@ const index = () => {
                         anchorOrigin={{
                             vertical: 'bottom',
                             horizontal: 'center',
-                          }}
-                          transformOrigin={{
+                        }}
+                        transformOrigin={{
                             vertical: 'top',
                             horizontal: 'center',
-                          }}
+                        }}
                     >
                         <MenuItem onClick={handleCloseMenu}>Profile</MenuItem>
                         <MenuItem onClick={signOut}>Logout</MenuItem>
@@ -166,6 +189,7 @@ border-bottom: 1px solid whitesmoke;
 
 const StyledAvatar = styled(Avatar)`
 cursor: pointer;
+box-shadow:0px 0px 8px #4f1919;
 :hover{
     opacity:0.8;
 }

@@ -8,46 +8,51 @@ import AttachFileIcon from '@material-ui/icons/AttachFile'
 import { useCollection } from 'react-firebase-hooks/firestore';
 import Message from './Message';
 import { InsertEmoticon } from '@material-ui/icons';
-import { useState } from 'react';
 import firebase from 'firebase';
 import getOtherEmail from '../../utils/getOtherEmail';
 import TimeAgo from 'timeago-react';
 import { useRef } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import 'emoji-mart/css/emoji-mart.css'
+import { Picker } from 'emoji-mart'
 
 const index = ({ chat, messages }) => {
     const [user] = useAuthState(auth);
-    const recipientMail=getOtherEmail(JSON.parse(chat).users, user.email);
+    const recipientMail = getOtherEmail(JSON.parse(chat).users, user.email);
     const router = useRouter();
-    const endOfMessage=useRef(null);
+    const endOfMessage = useRef(null);
     const [inputMessage, setInputMessage] = useState('')
     const [messagesSnap] = useCollection(db.collection('chats').doc(router.query.id).collection('messages').orderBy('timestamp', 'asc'));
-    const [recipientsSnap]= useCollection(db.collection('users').where("email","==",recipientMail));
+    const [recipientsSnap] = useCollection(db.collection('users').where("email", "==", recipientMail));
+    const [selectEmote, setSelectEmote] = useState(false);
 
     const sendMessage = (e) => {
         e.preventDefault();
-        if (inputMessage === "") return
+        if (inputMessage.replace(/ /g, '') === "") {
+            setInputMessage('')
+            return
+        }
 
         db.collection('users').doc(user.uid).set({
             lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
         }, { merge: true })
         db.collection('chats').doc(router.query.id).collection('messages').add({
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            message: inputMessage,
+            message: inputMessage.replace(/ /g, ''),
             user: user.email,
         })
         setInputMessage('')
         scroll();
     }
 
-    const scroll =()=>{
+    const scroll = () => {
         endOfMessage.current.scrollIntoView({
-            behaviour:"smooth",
-            block:"start",
+            behaviour: "smooth",
+            block: "start",
         })
     }
 
-    useEffect(()=>scroll())
+    useEffect(() => scroll())
 
     const recipient = recipientsSnap?.docs?.[0]?.data();
 
@@ -76,14 +81,19 @@ const index = ({ chat, messages }) => {
         }
     }
 
+    const handleEmote = (emoji, event) => {
+        event.preventDefault();
+        setInputMessage(inputMessage + `${emoji.native}`)
+    }
+
     return (
         <Container>
             <Header>
                 {
-                    recipient?(
-                        <Avatar src={recipient?.profileURL} />
-                    ):(
-                        <Avatar>{recipientMail[0].toUpperCase()}</Avatar>
+                    recipient ? (
+                        <Avatar src={recipient?.profileURL} style={{boxShadow:'0px 0px 8px #4f1919'}}/>
+                    ) : (
+                        <Avatar style={{boxShadow:'0px 0px 8px #4f1919'}}>{recipientMail[0].toUpperCase() }</Avatar>
                     )
                 }
                 <UserInfo>
@@ -91,11 +101,11 @@ const index = ({ chat, messages }) => {
                     {
                         recipientsSnap ? (
                             <div>Last Seen: {" "} {
-                                recipient?.lastSeen?(
+                                recipient?.lastSeen ? (
                                     <TimeAgo datetime={recipient?.lastSeen?.toDate()} />
-                                ):("Unavailable")
+                                ) : ("Unavailable")
                             }</div>
-                        ):(
+                        ) : (
                             <div>loading...</div>
                         )
                     }
@@ -111,13 +121,30 @@ const index = ({ chat, messages }) => {
             </Header>
             <ChatSection>
                 {chatMessages()}
-                <EndOfMessage ref={endOfMessage}/>
+                <EndOfMessage ref={endOfMessage} />
             </ChatSection>
-            <InputBar onSubmit={(e) => sendMessage(e)}>
-                <InsertEmoticon style={{ color: "#a9a9a9", fontSize: "30px" }} />
-                <InputChat onChange={(e) => setInputMessage(e.target.value)} value={inputMessage} placeholder="Type a Message" />
-                <button hidden disabled={inputMessage === ""} type='submit' >submit</button>
-            </InputBar>
+            <Footer>
+                {
+                    selectEmote &&
+                    <Picker
+                        color={'#33fa44'}
+                        style={{ width: '100%' }}
+                        title='Hola buddies'
+                        emojiSize={36}
+                        theme={'dark'}
+                        set='apple'
+                        emoji={'full_moon_with_face'}
+                        onClick={handleEmote}
+                    />
+                }
+                <InputBar onSubmit={(e) => sendMessage(e)}>
+                    <IconButton onClick={() => setSelectEmote(!selectEmote)}>
+                        <InsertEmoticon style={{ color: selectEmote ? ('white') : ("#a9a9a9"), fontSize: "30px" }} />
+                    </IconButton>
+                    <InputChat onChange={(e) => setInputMessage(e.target.value)} value={inputMessage} placeholder="Type a Message" />
+                    <SendButton hidden={inputMessage.replace(/ /g, '') === ''} disabled={inputMessage === ""} type='submit' ><img src={'/logo.png'} /></SendButton>
+                </InputBar>
+            </Footer>
         </Container>
     )
 }
@@ -167,9 +194,14 @@ align-items: center;
 justify-content:flex-start;
 padding:10px;
 gap: 10px;
+background-color:#181b38;
+`;
+
+const Footer = styled.div`
+display:flex;
 position:sticky;
 bottom:0px;
-background-color:#181b38;
+flex-direction:column;
 `;
 
 const InputChat = styled.input`
@@ -180,10 +212,22 @@ font-size:15px;
 padding: 0px 20px;
 flex:1;
 margin-left:10px;
+margin-right:10px;
 background-color:#15161d;
 color:white;
 :focus{
     outline:none;
 }
+`;
 
+const SendButton = styled.button`
+background:transparent;
+border:none;
+overflow:visible;
+cursor:pointer;
+>img{
+    height:40px;
+    margin-bottom:-20px;
+    overflow:visible;
+}
 `;

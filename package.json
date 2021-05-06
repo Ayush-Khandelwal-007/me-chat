@@ -12,6 +12,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.58",
     "email-validator": "^2.0.4",
+    "emoji-mart": "^3.0.1",
     "firebase": "^8.4.3",
     "moment": "^2.29.1",
     "next": "^10.0.0",
